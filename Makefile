@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -Iinclude  
 
-SRC = src/priority_queue.c src/main.c
+SRC = src/main.c src/priority_queue.c
 OBJ = $(SRC:.c=.o)
 TARGET = main
 
@@ -11,4 +11,4 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ)

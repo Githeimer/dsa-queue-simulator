@@ -3,7 +3,6 @@
 int main()
 {
     PriorityQueue *trafficQueue = createPriorityQueue();
-
     enqueue(trafficQueue, 1, 1, NORMAL_PRIORITY);
     enqueue(trafficQueue, 2, 2, NORMAL_PRIORITY);
 

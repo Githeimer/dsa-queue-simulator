@@ -29,4 +29,4 @@ Vehicle *dequeue(PriorityQueue *pq);
 void displayQueue(PriorityQueue *pq);
 void freeQueue(PriorityQueue *pq);
 
-#endif // PRIORITY_QUEUE_H
+#endif
