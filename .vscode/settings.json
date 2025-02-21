@@ -1,6 +1,5 @@
 {
   "files.associations": {
-    "priority_queue.h": "c",
-    "generator.h": "c"
+    "traffic_simulator.h": "c"
   }
 }

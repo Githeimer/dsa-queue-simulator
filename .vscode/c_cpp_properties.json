@@ -3,8 +3,12 @@
         {
             "name": "Win32",
             "includePath": [
+<<<<<<< HEAD
                 "**",
                 "${workspaceFolder}/include"
+=======
+                "${workspaceFolder}/**"
+>>>>>>> SDL3/himesh
             ],
             "defines": [
                 "_DEBUG",
