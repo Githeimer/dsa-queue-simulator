@@ -3,7 +3,8 @@
 #define SIMULATOR_H
 
 #include <SDL3/SDL.h>
-#include "./queue.h"
+
+#include "queue.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600

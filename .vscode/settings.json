@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "priority_queue.h": "c"
+    "priority_queue.h": "c",
+    "generator.h": "c"
   }
 }
