@@ -13,5 +13,5 @@ It simulates vehicles **queuing** and **dequeueing** based on traffic light chan
 🚗💨 Built with **C** and **SDL3**.
 
 Currently It's trash as you can see:
-![alt text](image.png)
+![alt text](./images/image.png)
 I'm working on it
