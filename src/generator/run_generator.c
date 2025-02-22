@@ -1,46 +1,52 @@
 #include <stdio.h>
-#include "generator.h"
-#include "lane.h"
-#include "vehicle.h"
-
-// Include for sleep (platform-dependent)
-#ifdef _WIN32
+#include <stdlib.h>
+#include <time.h>
 #include <windows.h> // For Sleep() on Windows
-#else
-#include <unistd.h> // For sleep() on Linux/macOS
-#endif
+
+#include "generator.h"
+#include "vehicle.h"
+#include "lane.h"
+
+// Define the list of lanes
+const char *lanes[] = {"AL2", "BL2", "CL2", "DL2"};
 
 int main()
 {
-    // Initialize a lane (Example: AL2)
-    Lane al2;
-    initLane(&al2, "AL2");
+    // Initialize random seed for randomness
+    srand(time(NULL));
 
-    // Initialize vehicle ID counter
+    // Initialize vehicle ID counter (ensure unique vehicle IDs)
     int vehicleIdCounter = 0;
 
-    // Generate 10 vehicles for the lane AL2
-    for (int i = 0; i < 10; i++)
+    // Initialize an array of Lane structs to store the lanes
+    Lane laneObjects[4];
+    for (int i = 0; i < 4; i++)
     {
-        generateVehicle(&al2, &vehicleIdCounter);
-// Sleep for 1 second (platform dependent)
-#ifdef _WIN32
-        Sleep(1000); // 1000 ms = 1 second (Windows)
-#else
-        sleep(1); // 1 second (Linux/macOS)
-#endif
+        initLane(&laneObjects[i], lanes[i]);
     }
 
-    // Write the generated vehicles to a file
-    writeVehicleToFile(&al2, "AL2.txt");
-
-    // Optionally, print the queue size or vehicle details
-    printf("Generated vehicles in AL2:\n");
-    Vehicle *current = al2.head;
-    while (current != NULL)
+    // Infinite loop to continuously generate vehicles
+    while (1)
     {
-        printf("Vehicle ID: %d, Direction: %c\n", current->id, current->direction);
-        current = current->next;
+        // Choose a random lane
+        int laneIndex = rand() % 4;
+        printf("\nSelected lane: %s\n", lanes[laneIndex]);
+
+        // Generate a new vehicle and get the unique vehicle ID
+        generateVehicle(&laneObjects[laneIndex], &vehicleIdCounter);
+
+        // Store the vehicle immediately in the file
+        char fileName[20]; // Change to accommodate longer file names
+        snprintf(fileName, sizeof(fileName), "./data/vehicles.txt");
+
+        // Write to file
+        writeNewVehicleToFile(&laneObjects[laneIndex], "./data/vehicles.txt");
+
+        // Print a message for the generated vehicle
+        printf("Vehicle %d generated in lane %s\n", vehicleIdCounter - 1, lanes[laneIndex]);
+
+        // Sleep for 2 seconds before generating the next vehicle
+        Sleep(2000); // Sleep for 2000 milliseconds (2 seconds)
     }
 
     return 0;

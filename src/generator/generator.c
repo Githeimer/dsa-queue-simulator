@@ -19,7 +19,7 @@ void generateVehicle(Lane *lane, int *vehicleIdCounter)
     const char directions[] = {'N', 'E', 'S', 'W'};
     char direction = directions[rand() % 4];
 
-    // Create the vehicle
+    // Create the vehicle with a unique ID
     Vehicle *vehicle = createVehicle(*vehicleIdCounter, entryLane, exitLane, direction);
 
     // Enqueue the vehicle in the lane
@@ -29,8 +29,8 @@ void generateVehicle(Lane *lane, int *vehicleIdCounter)
     (*vehicleIdCounter)++;
 }
 
-// Write the vehicle details to the file associated with the lane
-void writeVehicleToFile(Lane *lane, const char *fileName)
+// Write the details of the most recently generated vehicle to the file
+void writeNewVehicleToFile(Lane *lane, const char *fileName)
 {
     FILE *file = fopen(fileName, "a"); // Open in append mode
 
@@ -40,12 +40,12 @@ void writeVehicleToFile(Lane *lane, const char *fileName)
         return;
     }
 
-    Vehicle *current = lane->head;
-    while (current != NULL)
+    // Get the most recently generated vehicle (tail of the queue)
+    Vehicle *newVehicle = lane->tail;
+    if (newVehicle != NULL)
     {
         fprintf(file, "Vehicle ID: %d, Entry Lane: %s, Exit Lane: %s, Direction: %c\n",
-                current->id, current->entryLane, current->exitLane, current->direction);
-        current = current->next;
+                newVehicle->id, newVehicle->entryLane, newVehicle->exitLane, newVehicle->direction);
     }
 
     fclose(file); // Close the file after writing

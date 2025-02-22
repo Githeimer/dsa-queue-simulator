@@ -6,6 +6,6 @@
 
 // Function declarations
 void generateVehicle(Lane *lane, int *vehicleIdCounter);
-void writeVehicleToFile(Lane *lane, const char *fileName);
+void writeNewVehicleToFile(Lane *lane, const char *fileName);
 
 #endif // GENERATOR_H
