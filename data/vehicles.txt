@@ -1,8 +1,7 @@
-Vehicle ID: 0, Entry Lane: DL2, Exit Lane: BL2, Direction: N
-Vehicle ID: 1, Entry Lane: CL2, Exit Lane: AL2, Direction: N
-Vehicle ID: 2, Entry Lane: CL2, Exit Lane: AL2, Direction: S
-Vehicle ID: 3, Entry Lane: CL2, Exit Lane: BL2, Direction: W
-Vehicle ID: 4, Entry Lane: BL2, Exit Lane: AL2, Direction: S
-Vehicle ID: 5, Entry Lane: CL2, Exit Lane: BL2, Direction: S
-Vehicle ID: 6, Entry Lane: CL2, Exit Lane: AL2, Direction: S
-Vehicle ID: 7, Entry Lane: AL2, Exit Lane: DL2, Direction: N
+Vehicle ID: 0, Entry Lane: CL2, Exit Lane: BL2, Direction: S
+Vehicle ID: 1, Entry Lane: DL2, Exit Lane: CL2, Direction: N
+Vehicle ID: 2, Entry Lane: BL2, Exit Lane: AL2, Direction: E
+Vehicle ID: 3, Entry Lane: CL2, Exit Lane: BL2, Direction: E
+Vehicle ID: 4, Entry Lane: CL2, Exit Lane: BL2, Direction: S
+Vehicle ID: 5, Entry Lane: CL2, Exit Lane: AL2, Direction: E
+Vehicle ID: 6, Entry Lane: BL2, Exit Lane: AL2, Direction: W

@@ -68,12 +68,12 @@ void readVehicleData(const char *filename)
         }
 
         int id;
-        char entryLane[4]; // Increase the size to accommodate 3-character lanes
-        char exitLane[4];  // Same for exitLane
-        char direction[2];
+        char entryLane[3]; // Increase the size to accommodate 3-character lanes
+        char exitLane[3];  // Same for exitLane
+        char direction[1];
 
         // Now, try to parse the line with the expected format
-        if (sscanf(line, "Vehicle ID: %d, Entry Lane: %3s, Exit Lane: %3s, Direction: %1s",
+        if (sscanf(line, "Vehicle ID: %d, Entry Lane: %s, Exit Lane: %s, Direction: %1s",
                    &id, entryLane, exitLane, direction) == 4)
         {
             // Check if the vehicle ID is already processed
