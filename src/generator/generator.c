@@ -3,17 +3,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 // Generates a random vehicle and enqueues it in the given lane
 void generateVehicle(Lane *lane, int *vehicleIdCounter)
 {
-    // Define exit lanes (random choice between L1 and L3)
-    const char *exitLanes[] = {"AL1", "BL1", "CL1", "DL1", "L3"};
+    // Define exit lanes based on entry lanes (your specified transitions)
+    const char *exitLanesAL2[] = {"CL2", "DL2"};
+    const char *exitLanesBL2[] = {"DL2", "AL2"};
+    const char *exitLanesCL2[] = {"AL2", "BL2"};
+    const char *exitLanesDL2[] = {"BL2", "CL2"};
 
-    // Randomly choose an entry lane and exit lane
+    // Randomly choose an entry lane
     char entryLane[4];
     snprintf(entryLane, sizeof(entryLane), "%s", lane->name); // Use the lane's name as the entry lane
-    const char *exitLane = exitLanes[rand() % 5];             // Random exit lane
+
+    // Define the valid exit lanes based on the entry lane
+    const char **exitLanes = NULL;
+    int numExitLanes = 0;
+
+    if (strcmp(entryLane, "AL2") == 0)
+    {
+        exitLanes = exitLanesAL2;
+        numExitLanes = 2;
+    }
+    else if (strcmp(entryLane, "BL2") == 0)
+    {
+        exitLanes = exitLanesBL2;
+        numExitLanes = 2;
+    }
+    else if (strcmp(entryLane, "CL2") == 0)
+    {
+        exitLanes = exitLanesCL2;
+        numExitLanes = 2;
+    }
+    else if (strcmp(entryLane, "DL2") == 0)
+    {
+        exitLanes = exitLanesDL2;
+        numExitLanes = 2;
+    }
+
+    // Randomly choose an exit lane
+    const char *exitLane = exitLanes[rand() % numExitLanes];
 
     // Randomly pick a direction (N, E, S, W)
     const char directions[] = {'N', 'E', 'S', 'W'};

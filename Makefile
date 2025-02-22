@@ -1,14 +1,21 @@
 CC = gcc
 CFLAGS = -I./include
 LDFLAGS = -L./lib -lSDL3
-EXEC = generator
+EXEC_GENERATOR = generator
+EXEC_SIMULATOR = simulator
 
-SRC = src/generator/generator.c src/generator/run_generator.c src/vehicle/vehicle.c src/lane/lane.c
+SRC_GENERATOR = src/generator/generator.c src/generator/run_generator.c src/vehicle/vehicle.c src/lane/lane.c
+SRC_SIMULATOR = src/simulator/simulation.c src/vehicle/vehicle.c src/lane/lane.c  # Add your simulator source file here
 
-all: $(EXEC)
+all: $(EXEC_GENERATOR) $(EXEC_SIMULATOR)
 
-$(EXEC): $(SRC)
+# Build the generator
+$(EXEC_GENERATOR): $(SRC_GENERATOR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Build the simulator
+$(EXEC_SIMULATOR): $(SRC_SIMULATOR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
-	rm -f $(EXEC)
+	rm -f $(EXEC_GENERATOR) $(EXEC_SIMULATOR)
