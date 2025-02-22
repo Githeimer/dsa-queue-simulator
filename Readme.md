@@ -12,6 +12,9 @@ It simulates vehicles **queuing** and **dequeueing** based on traffic light chan
 
 🚗💨 Built with **C** and **SDL3**.
 
+The Generator works properly:
+![alt text](./images/Desktop2025.02.22-13.51.38.02-ezgif.com-video-to-gif-converter.gif)
+
 Currently It's trash as you can see:
 ![alt text](./images/image.png)
 I'm working on it
