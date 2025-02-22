@@ -1,0 +1,10 @@
+Vehicle ID: 0, Entry Lane: A, Exit Lane: L, Speed: 2, Direction: W
+Vehicle ID: 1, Entry Lane: A, Exit Lane: L, Speed: 10, Direction: N
+Vehicle ID: 2, Entry Lane: A, Exit Lane: L, Speed: 9, Direction: W
+Vehicle ID: 3, Entry Lane: A, Exit Lane: L, Speed: 6, Direction: E
+Vehicle ID: 4, Entry Lane: A, Exit Lane: L, Speed: 8, Direction: W
+Vehicle ID: 5, Entry Lane: A, Exit Lane: L, Speed: 3, Direction: W
+Vehicle ID: 6, Entry Lane: A, Exit Lane: L, Speed: 5, Direction: E
+Vehicle ID: 7, Entry Lane: A, Exit Lane: L, Speed: 3, Direction: E
+Vehicle ID: 8, Entry Lane: A, Exit Lane: L, Speed: 7, Direction: W
+Vehicle ID: 9, Entry Lane: A, Exit Lane: L, Speed: 7, Direction: W

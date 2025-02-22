@@ -1,6 +1,14 @@
 #include <stdio.h>
-#include "lane.h"
 #include "generator.h"
+#include "lane.h"
+#include "vehicle.h"
+
+// Include for sleep (platform-dependent)
+#ifdef _WIN32
+#include <windows.h> // For Sleep() on Windows
+#else
+#include <unistd.h> // For sleep() on Linux/macOS
+#endif
 
 int main()
 {
@@ -15,6 +23,12 @@ int main()
     for (int i = 0; i < 10; i++)
     {
         generateVehicle(&al2, &vehicleIdCounter);
+// Sleep for 1 second (platform dependent)
+#ifdef _WIN32
+        Sleep(1000); // 1000 ms = 1 second (Windows)
+#else
+        sleep(1); // 1 second (Linux/macOS)
+#endif
     }
 
     // Write the generated vehicles to a file

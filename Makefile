@@ -1,8 +1,9 @@
 CC = gcc
 CFLAGS = -I./include
 LDFLAGS = -L./lib -lSDL3
-EXEC = main
-SRC = main.c src/simulator/traffic_simulator.c
+EXEC = generator
+
+SRC = src/generator/generator.c src/generator/run_generator.c src/vehicle/vehicle.c src/lane/lane.c
 
 all: $(EXEC)
 
