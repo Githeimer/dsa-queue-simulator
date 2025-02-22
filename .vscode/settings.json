@@ -1,5 +1,9 @@
 {
   "files.associations": {
-    "traffic_simulator.h": "c"
+    "traffic_simulator.h": "c",
+    "traffic_control.h": "c",
+    "simulator.h": "c",
+    "simulatorvehicle.h": "c",
+    "vehiclequeue.h": "c"
   }
 }

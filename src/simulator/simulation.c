@@ -2,21 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vehicleQueue.h>
 
 #define WIDTH 800
 #define HEIGHT 600
 #define MAX_VEHICLES 100
 
-typedef struct Vehicle
+typedef struct SimulationVehicle
 {
     int id;
     char entryLane[4]; // AL2, BL2, etc.
     char exitLane[4];  // DL2, BL2, etc.
     char direction[2]; // Direction N, S, E, W
-} Vehicle;
+} SimulationVehicle;
 
 Vehicle vehicles[MAX_VEHICLES];
 int vehicleCount = 0;
+
+LaneQueue AL2Queue, BL2Queue, CL2Queue, DL2Queue;
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -39,6 +42,12 @@ int isVehicleProcessed(int id)
 
 void readVehicleData(const char *filename)
 {
+    // Initialize the queues for each lane
+    initializeQueue(&AL2Queue);
+    initializeQueue(&BL2Queue);
+    initializeQueue(&CL2Queue);
+    initializeQueue(&DL2Queue);
+
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -68,9 +77,9 @@ void readVehicleData(const char *filename)
         if (sscanf(line, "Vehicle ID: %d, Entry Lane: %3s, Exit Lane: %3s, Direction: %1s",
                    &id, entryLane, exitLane, direction) == 4)
         {
-
             if (!isVehicleProcessed(id))
             {
+                // Add the vehicle to the new vehicles list
                 newVehicles[newVehicleCount].id = id;
                 strncpy(newVehicles[newVehicleCount].entryLane, entryLane, sizeof(newVehicles[newVehicleCount].entryLane) - 1);
                 newVehicles[newVehicleCount].entryLane[sizeof(newVehicles[newVehicleCount].entryLane) - 1] = '\0';
@@ -82,6 +91,11 @@ void readVehicleData(const char *filename)
                 printf("Successfully parsed Vehicle - ID: %d, Entry Lane: %s, Exit Lane: %s, Direction: %s\n",
                        newVehicles[newVehicleCount].id, newVehicles[newVehicleCount].entryLane,
                        newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction);
+
+                // Call checkQueue function to enqueue the vehicle in the correct lane
+                checkQueue(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue,
+                           newVehicles[newVehicleCount].id, newVehicles[newVehicleCount].entryLane,
+                           newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction);
 
                 // Add the vehicle ID to the processed list
                 processedVehicleIDs[processedVehicleCount++] = id;
