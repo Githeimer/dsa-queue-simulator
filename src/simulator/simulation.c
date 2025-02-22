@@ -10,9 +10,9 @@
 typedef struct Vehicle
 {
     int id;
-    char entryLane[3];
-    char exitLane[3];
-    char direction[2];
+    char entryLane[4]; // AL2, BL2, etc.
+    char exitLane[4];  // DL2, BL2, etc.
+    char direction[2]; // Direction N, S, E, W
 } Vehicle;
 
 Vehicle vehicles[MAX_VEHICLES];
@@ -52,31 +52,23 @@ void readVehicleData(const char *filename)
 
     while (fgets(line, sizeof(line), file))
     {
-
-        // Trim newline and any trailing spaces from the line
+        // Trim newline
         size_t len = strlen(line);
         if (len > 0 && line[len - 1] == '\n')
         {
-            line[len - 1] = '\0'; // Remove newline character
-        }
-
-        // Trim any extra spaces from the end
-        while (len > 0 && (line[len - 1] == ' ' || line[len - 1] == '\t'))
-        {
             line[len - 1] = '\0';
-            len--;
         }
 
         int id;
-        char entryLane[3]; // Increase the size to accommodate 3-character lanes
-        char exitLane[3];  // Same for exitLane
-        char direction[1];
+        char entryLane[4]; // AL2, BL2, etc.
+        char exitLane[4];  // DL2, BL2, etc.
+        char direction[2]; // Direction N, S, E, W
 
-        // Now, try to parse the line with the expected format
-        if (sscanf(line, "Vehicle ID: %d, Entry Lane: %s, Exit Lane: %s, Direction: %1s",
+        // Manually extract the vehicle details
+        if (sscanf(line, "Vehicle ID: %d, Entry Lane: %3s, Exit Lane: %3s, Direction: %1s",
                    &id, entryLane, exitLane, direction) == 4)
         {
-            // Check if the vehicle ID is already processed
+
             if (!isVehicleProcessed(id))
             {
                 newVehicles[newVehicleCount].id = id;
@@ -98,7 +90,6 @@ void readVehicleData(const char *filename)
         }
         else
         {
-            // Print out an error for badly formatted lines
             printf("Failed to parse line: '%s'\n", line);
         }
 
