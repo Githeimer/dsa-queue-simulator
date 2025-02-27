@@ -45,8 +45,7 @@ int main()
         // Print a message for the generated vehicle
         printf("Vehicle %d generated in lane %s\n", vehicleIdCounter - 1, lanes[laneIndex]);
 
-        // Sleep for 2 seconds before generating the next vehicle
-        Sleep(3500); // Sleep  (3.5 seconds)
+        Sleep(3500); // Sleep  (7.5 seconds)
     }
 
     return 0;

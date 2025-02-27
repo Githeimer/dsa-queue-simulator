@@ -4,6 +4,7 @@
 #include <string.h>
 #include <vehicleQueue.h>
 #include "road.h"
+#include "animation.h"
 
 #define WIDTH 900
 #define HEIGHT 900
@@ -40,13 +41,8 @@ int isVehicleProcessed(int id)
     return 0; // New vehicle
 }
 
-void readVehicleData(const char *filename)
+void readVehicleData(const char *filename, SDL_Renderer *renderer)
 {
-    // Initialize the queues for each lane
-    initializeQueue(&AL2Queue);
-    initializeQueue(&BL2Queue);
-    initializeQueue(&CL2Queue);
-    initializeQueue(&DL2Queue);
 
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -95,7 +91,7 @@ void readVehicleData(const char *filename)
                 // Call checkQueue function to enqueue the vehicle in the correct lane
                 checkQueue(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue,
                            newVehicles[newVehicleCount].id, newVehicles[newVehicleCount].entryLane,
-                           newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction);
+                           newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction, renderer);
 
                 // Add the vehicle ID to the processed list
                 processedVehicleIDs[processedVehicleCount++] = id;
@@ -132,46 +128,14 @@ void initSDL()
     SDL_RenderClear(renderer);
 
     SDL_RenderPresent(renderer);
-}
 
-void renderVehicles()
-{
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for vehicles
+    // Initialize the queues for each lane
+    initializeQueue(&AL2Queue);
+    initializeQueue(&BL2Queue);
+    initializeQueue(&CL2Queue);
+    initializeQueue(&DL2Queue);
 
-    for (int i = 0; i < vehicleCount; i++)
-    {
-        // Example vehicle positioning based on direction (this can be made more advanced)
-        float x = 100 + i * 40;
-        float y = 100;
-
-        if (strcmp(vehicles[i].direction, "N") == 0)
-        {
-            y -= 20; // Moving North
-        }
-        else if (strcmp(vehicles[i].direction, "S") == 0)
-        {
-            y += 20; // Moving South
-        }
-        else if (strcmp(vehicles[i].direction, "E") == 0)
-        {
-            x += 20; // Moving East
-        }
-        else if (strcmp(vehicles[i].direction, "W") == 0)
-        {
-            x -= 20; // Moving West
-        }
-
-        SDL_FRect vehicleRect = {x, y, 20, 10};
-        SDL_RenderFillRect(renderer, &vehicleRect);
-    }
-}
-
-void renderTrafficLights()
-{
-    // Placeholder for traffic lights
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green light (For example)
-    SDL_FRect lightRect = {WIDTH / 2 - 25, HEIGHT / 2 - 25, 50, 50};
-    SDL_RenderFillRect(renderer, &lightRect);
+    // RenderVehicle(renderer, "AL2", "CL2");
 }
 
 void closeSDL()
@@ -201,11 +165,9 @@ int main()
         SDL_RenderClear(renderer);
         DrawRoad(renderer);
 
-        readVehicleData("./data/vehicles.txt");
+        readVehicleData("./data/vehicles.txt", renderer);
 
         SDL_RenderPresent(renderer);
-
-        SDL_Delay(16);
     }
 
     closeSDL();

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "animation.h"
 
 // Initialize the queue for each lane
 void initializeQueue(LaneQueue *queue)
@@ -32,7 +33,7 @@ Vehicle *createVehicleNode(int id, const char *entryLane, const char *exitLane, 
 }
 
 // Enqueue a vehicle into the lane's queue
-void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char *exitLane, const char *direction)
+void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer)
 {
     Vehicle *newVehicle = createVehicleNode(id, entryLane, exitLane, direction);
     if (!newVehicle)
@@ -48,31 +49,31 @@ void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char 
     queue->rear = newVehicle;
     queue->size = queue->size + 1;
 
-    // renderVehicle(newVehicle);
+    RenderVehicle(renderer, entryLane, exitLane);
 }
 
 // Check the entry lane and enqueue the vehicle
 void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue,
-                int id, const char *entryLane, const char *exitLane, const char *direction)
+                int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer)
 {
     if (strcmp(entryLane, "AL2") == 0)
     {
-        enqueueVehicle(AL2Queue, id, entryLane, exitLane, direction);
+        enqueueVehicle(AL2Queue, id, entryLane, exitLane, direction, renderer);
         printf("Enqueued vehicle with ID %d to AL2\n", id);
     }
     else if (strcmp(entryLane, "BL2") == 0)
     {
-        enqueueVehicle(BL2Queue, id, entryLane, exitLane, direction);
+        enqueueVehicle(BL2Queue, id, entryLane, exitLane, direction, renderer);
         printf("Enqueued vehicle with ID %d to BL2\n", id);
     }
     else if (strcmp(entryLane, "CL2") == 0)
     {
-        enqueueVehicle(DL2Queue, id, entryLane, exitLane, direction);
+        enqueueVehicle(DL2Queue, id, entryLane, exitLane, direction, renderer);
         printf("Enqueued vehicle with ID %d to DL2\n", id);
     }
     else if (strcmp(entryLane, "DL2") == 0)
     {
-        enqueueVehicle(DL2Queue, id, entryLane, exitLane, direction);
+        enqueueVehicle(DL2Queue, id, entryLane, exitLane, direction, renderer);
         printf("Enqueued vehicle with ID %d to DL2\n", id);
     }
     else

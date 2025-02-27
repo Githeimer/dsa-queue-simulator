@@ -12,5 +12,5 @@ typedef struct AnimationVehicle
     SDL_Rect rect; // SDL rectangle for rendering
 } AnimationVehicle;
 
-void RenderVehicle(SDL_Renderer *renderer, const char *entryLane, const char *exitLane)
-#endif // ANIMATION.H
+void RenderVehicle(SDL_Renderer *renderer, const char *entryLane, const char *exitLane);
+#endif
