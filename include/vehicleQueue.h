@@ -1,6 +1,7 @@
 #ifndef VEHICLEQUEUE_H
 #define VEHICLEQUEUE_H
 
+#include <SDL3/SDL.h>
 // Define the Vehicle structure for simulation
 typedef struct Vehicle
 {
@@ -23,10 +24,10 @@ typedef struct LaneQueue
 void initializeQueue(LaneQueue *queue);
 
 // Function to enqueue a vehicle into the correct lane's queue
-void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char *exitLane, const char *direction);
+void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer);
 
 // Function to check the vehicle's entry lane and enqueue it accordingly
 void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue,
-                int id, const char *entryLane, const char *exitLane, const char *direction);
+                int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer);
 
 #endif // VEHICLEQUEUE_H

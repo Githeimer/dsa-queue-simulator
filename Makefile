@@ -5,7 +5,7 @@ EXEC_GENERATOR = generator
 EXEC_SIMULATOR = simulator
 
 SRC_GENERATOR = src/generator/generator.c src/generator/run_generator.c src/vehicle/vehicle.c src/lane/lane.c
-SRC_SIMULATOR = src/simulator/simulation.c src/simulator/vehicleQueue.c 
+SRC_SIMULATOR = src/simulator/simulation.c src/simulator/vehicleQueue.c src/lane/laneSimulation.c
 
 all: $(EXEC_GENERATOR) $(EXEC_SIMULATOR)
 

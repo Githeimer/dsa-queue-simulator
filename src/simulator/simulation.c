@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vehicleQueue.h>
+#include "road.h"
+#include "animation.h"
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 900
+#define HEIGHT 900
 #define MAX_VEHICLES 100
 
 typedef struct SimulationVehicle
@@ -24,7 +26,6 @@ LaneQueue AL2Queue, BL2Queue, CL2Queue, DL2Queue;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
-// A simple array to keep track of processed vehicle IDs.
 int processedVehicleIDs[MAX_VEHICLES];
 int processedVehicleCount = 0;
 
@@ -40,13 +41,8 @@ int isVehicleProcessed(int id)
     return 0; // New vehicle
 }
 
-void readVehicleData(const char *filename)
+void readVehicleData(const char *filename, SDL_Renderer *renderer)
 {
-    // Initialize the queues for each lane
-    initializeQueue(&AL2Queue);
-    initializeQueue(&BL2Queue);
-    initializeQueue(&CL2Queue);
-    initializeQueue(&DL2Queue);
 
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -95,7 +91,7 @@ void readVehicleData(const char *filename)
                 // Call checkQueue function to enqueue the vehicle in the correct lane
                 checkQueue(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue,
                            newVehicles[newVehicleCount].id, newVehicles[newVehicleCount].entryLane,
-                           newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction);
+                           newVehicles[newVehicleCount].exitLane, newVehicles[newVehicleCount].direction, renderer);
 
                 // Add the vehicle ID to the processed list
                 processedVehicleIDs[processedVehicleCount++] = id;
@@ -126,48 +122,20 @@ void readVehicleData(const char *filename)
 void initSDL()
 {
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Traffic Simulator", WIDTH, HEIGHT, 0);
-    renderer = SDL_CreateRenderer(window, "renderer");
-}
+    window = SDL_CreateWindow("Traffic Simulator", WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE);
+    renderer = SDL_CreateRenderer(window, NULL);
 
-void renderVehicles()
-{
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for vehicles
+    SDL_RenderClear(renderer);
 
-    for (int i = 0; i < vehicleCount; i++)
-    {
-        // Example vehicle positioning based on direction (this can be made more advanced)
-        float x = 100 + i * 40;
-        float y = 100;
+    SDL_RenderPresent(renderer);
 
-        if (strcmp(vehicles[i].direction, "N") == 0)
-        {
-            y -= 20; // Moving North
-        }
-        else if (strcmp(vehicles[i].direction, "S") == 0)
-        {
-            y += 20; // Moving South
-        }
-        else if (strcmp(vehicles[i].direction, "E") == 0)
-        {
-            x += 20; // Moving East
-        }
-        else if (strcmp(vehicles[i].direction, "W") == 0)
-        {
-            x -= 20; // Moving West
-        }
+    // Initialize the queues for each lane
+    initializeQueue(&AL2Queue);
+    initializeQueue(&BL2Queue);
+    initializeQueue(&CL2Queue);
+    initializeQueue(&DL2Queue);
 
-        SDL_FRect vehicleRect = {x, y, 20, 10};
-        SDL_RenderFillRect(renderer, &vehicleRect);
-    }
-}
-
-void renderTrafficLights()
-{
-    // Placeholder for traffic lights
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green light (For example)
-    SDL_FRect lightRect = {WIDTH / 2 - 25, HEIGHT / 2 - 25, 50, 50};
-    SDL_RenderFillRect(renderer, &lightRect);
+    // RenderVehicle(renderer, "AL2", "CL2");
 }
 
 void closeSDL()
@@ -192,18 +160,14 @@ int main()
                 return 0;
             }
         }
+        SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255); // Light gray color
 
         SDL_RenderClear(renderer);
+        DrawRoad(renderer);
 
-        // Read vehicle data from the file
-        readVehicleData("./data/vehicles.txt");
-
-        renderVehicles();
-        renderTrafficLights();
+        readVehicleData("./data/vehicles.txt", renderer);
 
         SDL_RenderPresent(renderer);
-
-        SDL_Delay(4100); // Delay to simulate real-time (2.1 seconds)
     }
 
     closeSDL();
