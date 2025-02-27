@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vehicleQueue.h>
+#include "road.h"
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 900
+#define HEIGHT 900
 #define MAX_VEHICLES 100
 
 typedef struct SimulationVehicle
@@ -24,7 +25,6 @@ LaneQueue AL2Queue, BL2Queue, CL2Queue, DL2Queue;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
-// A simple array to keep track of processed vehicle IDs.
 int processedVehicleIDs[MAX_VEHICLES];
 int processedVehicleCount = 0;
 
@@ -126,8 +126,12 @@ void readVehicleData(const char *filename)
 void initSDL()
 {
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Traffic Simulator", WIDTH, HEIGHT, 0);
-    renderer = SDL_CreateRenderer(window, "renderer");
+    window = SDL_CreateWindow("Traffic Simulator", WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE);
+    renderer = SDL_CreateRenderer(window, NULL);
+
+    SDL_RenderClear(renderer);
+
+    SDL_RenderPresent(renderer);
 }
 
 void renderVehicles()
@@ -192,18 +196,16 @@ int main()
                 return 0;
             }
         }
+        SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255); // Light gray color
 
         SDL_RenderClear(renderer);
+        DrawRoad(renderer);
 
-        // Read vehicle data from the file
         readVehicleData("./data/vehicles.txt");
-
-        renderVehicles();
-        renderTrafficLights();
 
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(4100); // Delay to simulate real-time (2.1 seconds)
+        SDL_Delay(16);
     }
 
     closeSDL();

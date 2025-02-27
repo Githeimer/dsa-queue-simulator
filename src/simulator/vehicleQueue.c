@@ -47,6 +47,8 @@ void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char 
     queue->rear->next = newVehicle;
     queue->rear = newVehicle;
     queue->size = queue->size + 1;
+
+    // renderVehicle(newVehicle);
 }
 
 // Check the entry lane and enqueue the vehicle

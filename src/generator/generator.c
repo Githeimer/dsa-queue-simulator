@@ -8,11 +8,11 @@
 // Generates a random vehicle and enqueues it in the given lane
 void generateVehicle(Lane *lane, int *vehicleIdCounter)
 {
-    // Define exit lanes based on entry lanes (your specified transitions)
-    const char *exitLanesAL2[] = {"CL2", "DL2"};
-    const char *exitLanesBL2[] = {"DL2", "AL2"};
-    const char *exitLanesCL2[] = {"AL2", "BL2"};
-    const char *exitLanesDL2[] = {"BL2", "CL2"};
+
+    const char *exitLanesAL2[] = {"CL1", "DL1"};
+    const char *exitLanesBL2[] = {"DL1", "AL1"};
+    const char *exitLanesCL2[] = {"AL1", "BL1"};
+    const char *exitLanesDL2[] = {"BL1", "CL1"};
 
     // Randomly choose an entry lane
     char entryLane[4];
