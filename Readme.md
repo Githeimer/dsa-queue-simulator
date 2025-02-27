@@ -19,8 +19,8 @@ The Data is Successfully parsed in simulator side
 ![alt text](./images/Desktop2025.02.22-19.39.36.05-ezgif.com-video-to-gif-converter.gif)
 
 Simulation:
-Currently It's trash as you can see:
-![alt text](./images/image.png)
+It works upto the switching of lanes, dequeue implementation and lights remaining:
+![alt text](./images/Dsa-queue-simulator2025.02.28-00.26.46.01-ezgif.com-video-to-gif-converter.gif)
 I'm working on it
 
 ## Description
