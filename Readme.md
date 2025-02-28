@@ -20,8 +20,7 @@ The Data is Successfully parsed in simulator side
 
 Simulation:
 It works upto the switching of lanes, dequeue implementation and lights remaining:
-![alt text](./images/Dsa-queue-simulator2025.02.28-00.26.46.01-ezgif.com-video-to-gif-converter.gif)
-I'm working on it
+![alt text](./images/ezgif.com-video-to-gif-converter.gif)
 
 ## Description
 

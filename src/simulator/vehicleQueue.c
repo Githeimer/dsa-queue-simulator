@@ -350,7 +350,7 @@ void updateVehiclesInQueue(LaneQueue *queue)
         if (current->active)
         {
             // Update vehicle position based on progress
-            current->progress += 0.003f; // Adjust speed as needed
+            current->progress += 0.002f; // Adjust speed as needed
 
             if (current->progress >= 1.0f)
             {
