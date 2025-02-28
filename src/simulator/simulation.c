@@ -172,11 +172,10 @@ int main()
         readVehicleData("./data/vehicles.txt", renderer);
 
         // Update all vehicle positions
+        renderAllVehicles(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue, renderer);
         updateAllVehicles(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue);
 
-        renderAllVehicles(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue, renderer);
-
-        SDL_RenderPresent(renderer);
+               SDL_RenderPresent(renderer);
 
         // Add a small delay to control frame rate
         SDL_Delay(16); // Approx 60 FPS

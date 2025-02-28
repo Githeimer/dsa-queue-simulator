@@ -2,6 +2,13 @@
 #define VEHICLEQUEUE_H
 
 #include <SDL3/SDL.h>
+
+typedef enum
+{
+    RED,
+    GREEN,
+    YELLOW
+} TrafficLightState;
 // Define the Vehicle structure for simulation
 typedef struct Vehicle
 {
@@ -22,11 +29,23 @@ typedef struct Vehicle
     struct Vehicle *next;
 } Vehicle;
 // Define the Lane Queue structure
-typedef struct LaneQueue
+
+typedef struct
+{
+    TrafficLightState state;
+    int greenTimer;   // Counts down remaining green time
+    int yellowTimer;  // Counts down remaining yellow time
+    int minGreenTime; // Minimum green time
+    int maxGreenTime; // Maximum green time
+    int yellowTime;   // Standard yellow time
+} TrafficLight;
+
+typedef struct
 {
     Vehicle *front;
     Vehicle *rear;
     int size;
+    TrafficLight light; // Add traffic light to each lane
 } LaneQueue;
 
 // Function to initialize the queue
@@ -52,5 +71,11 @@ void renderAllVehicles(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Q
 void renderVehiclesInQueue(LaneQueue *queue, SDL_Renderer *renderer);
 
 void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction);
+
+void updateVehiclePositionBasedOnPath(Vehicle *vehicle, int centerX, int centerY);
+void initializeTrafficLight(TrafficLight *light);
+void updateTrafficLights(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue);
+void switchLightToGreen(LaneQueue *laneQueue, LaneQueue *otherLanes[], int numOtherLanes);
+void renderTrafficLights(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue, SDL_Renderer *renderer);
 
 #endif // VEHICLEQUEUE_H

@@ -62,12 +62,12 @@ void DrawLaneLabels(SDL_Renderer *renderer)
 void DrawRoad(SDL_Renderer *renderer)
 {
     // Set background color (green for grass/terrain)
-    SDL_SetRenderDrawColor(renderer, 50, 150, 50, 255);
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 60);
     SDL_FRect background = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
     SDL_RenderFillRect(renderer, &background);
 
     // Gray color for roads
-    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
 
     // Vertical roads (A - Top, C - Bottom)
     SDL_FRect roadA = {WINDOW_WIDTH / 2 - ROAD_WIDTH / 2, 0, ROAD_WIDTH, WINDOW_HEIGHT / 2};
@@ -84,7 +84,7 @@ void DrawRoad(SDL_Renderer *renderer)
     SDL_RenderFillRect(renderer, &roadD);
 
     // Draw lane dividers (White lines for lanes)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 250, 0, 255);
 
     int dashLength = 15, gapLength = 15;
 

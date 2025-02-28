@@ -15,6 +15,8 @@ void initializeQueue(LaneQueue *queue)
 {
     queue->front = NULL;
     queue->rear = NULL;
+    queue->size = 0;
+    initializeTrafficLight(&queue->light);
 }
 
 // Create a new vehicle node
@@ -91,6 +93,7 @@ void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, L
 
 void updateAllVehicles(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue)
 {
+    updateTrafficLights(AL2Queue, BL2Queue, CL2Queue, DL2Queue);
     // Update vehicles in each queue
     updateVehiclesInQueue(AL2Queue);
     updateVehiclesInQueue(BL2Queue);
@@ -105,6 +108,7 @@ void renderAllVehicles(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Q
     renderVehiclesInQueue(BL2Queue, renderer);
     renderVehiclesInQueue(CL2Queue, renderer);
     renderVehiclesInQueue(DL2Queue, renderer);
+    renderTrafficLights(AL2Queue, BL2Queue, CL2Queue, DL2Queue, renderer);
 }
 
 void renderVehiclesInQueue(LaneQueue *queue, SDL_Renderer *renderer)
@@ -284,11 +288,11 @@ void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction)
     // Set color based on direction
     if (strcmp(direction, "N") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red for North
+        SDL_SetRenderDrawColor(renderer, 143, 0, 255, 255);
     }
     else if (strcmp(direction, "E") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green for East
+        SDL_SetRenderDrawColor(renderer, 33, 79, 198, 255);
     }
     else if (strcmp(direction, "S") == 0)
     {
@@ -296,11 +300,11 @@ void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction)
     }
     else if (strcmp(direction, "W") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Yellow for West
+        SDL_SetRenderDrawColor(renderer, 255, 127, 0, 255); // Cyan
     }
     else
     {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Default to red
+        SDL_SetRenderDrawColor(renderer, 8, 133, 161, 255);
     }
 
     // Create vehicle shape (rectangle + direction indicator)
@@ -342,163 +346,203 @@ void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction)
 
 void updateVehiclesInQueue(LaneQueue *queue)
 {
+    if (!queue)
+        return; // Null check
+
     Vehicle *current = queue->front;
     Vehicle *prev = NULL;
 
+    // Traffic light state
+    bool canMoveThrough = (queue->light.state == GREEN || queue->light.state == YELLOW);
+
+    // Constants for vehicle movement
+    const float VEHICLE_SPEED = 0.002f;
+    const float MIN_VEHICLE_GAP = 0.05f;
+    const float VEHICLE_LENGTH = 0.03f;
+
+    // Calculate intersection center (once for efficiency)
+    int centerX = WINDOW_WIDTH / 2;
+    int centerY = WINDOW_HEIGHT / 2;
+
     while (current != NULL)
     {
-        if (current->active)
+        if (!current->active)
         {
-            // Update vehicle position based on progress
-            current->progress += 0.002f; // Adjust speed as needed
+            prev = current;
+            current = current->next;
+            continue;
+        }
 
+        // Check if vehicle is at different points of its journey
+        bool atIntersectionEntrance = (current->progress >= 0.39f && current->progress < 0.41f);
+        bool inIntersection = (current->progress >= 0.4f && current->progress <= 0.6f);
+
+        // Check spacing with vehicle ahead (if any)
+        bool shouldMaintainGap = false;
+        if (prev != NULL && prev->active)
+        {
+            // Verify the vehicle is ahead, not behind
+            if (prev->progress > current->progress)
+            {
+                float gap = prev->progress - current->progress;
+                if (gap < (MIN_VEHICLE_GAP + VEHICLE_LENGTH))
+                {
+                    shouldMaintainGap = true;
+                }
+            }
+        }
+
+        // Determine if vehicle should move
+        bool shouldMove = true;
+
+        // Stop at red light if at intersection entrance
+        if (atIntersectionEntrance && !canMoveThrough)
+        {
+            shouldMove = false;
+        }
+
+        // Maintain gap with vehicle ahead
+        if (shouldMaintainGap)
+        {
+            shouldMove = false;
+        }
+
+        // Move vehicle if conditions allow
+        if (shouldMove)
+        {
+            current->progress += VEHICLE_SPEED;
+
+            // Update vehicle position based on its progress and path
             if (current->progress >= 1.0f)
             {
-                // Vehicle reached destination
+                // Vehicle has completed its journey
                 current->active = false;
 
-                // If at front of queue, dequeue it
-                if (prev == NULL)
+                // Only dequeue if this is the front vehicle
+                if (current == queue->front)
                 {
-                    dequeueVehicle(queue);
-                    current = queue->front;
+                    Vehicle *temp = current;
+                    current = current->next;
+                    queue->front = current;
+                    if (queue->front == NULL)
+                        queue->rear = NULL;
+                    queue->size--;
+                    free(temp);
+                    prev = NULL; // Reset prev since we've removed the front
                     continue;
                 }
             }
             else
             {
-                // Check if we need to perform lane switching
-                // For example, if a vehicle needs to turn, it should start switching lanes
-                // before reaching the intersection
-
-                // Calculate intersection center
-                int centerX = WINDOW_WIDTH / 2;
-                int centerY = WINDOW_HEIGHT / 2;
-
-                // Basic path planning for lane switching - this is a simplified approach
-                // For proper lane switching, you would need more complex path planning
-
-                // Get entry road and exit road
-                char entryRoad = current->entryLane[0]; // First character (A, B, C, or D)
-                char exitRoad = current->exitLane[0];   // First character (A, B, C, or D)
-
-                // Get entry and exit lane numbers
-                int entryLaneNum = current->entryLane[2] - '0';
-                int exitLaneNum = current->exitLane[2] - '0';
-
-                // Path adjustments based on direction of travel
-                float interX = current->x;
-                float interY = current->y;
-
-                // If approaching the intersection (between 0.4 and 0.6 progress)
-                if (current->progress > 0.4f && current->progress < 0.6f)
-                {
-                    // Custom path through intersection based on entry/exit roads
-                    if ((entryRoad == 'A' && exitRoad == 'C') ||
-                        (entryRoad == 'C' && exitRoad == 'A') ||
-                        (entryRoad == 'B' && exitRoad == 'D') ||
-                        (entryRoad == 'D' && exitRoad == 'B'))
-                    {
-                        // Straight path - no adjustments needed
-                    }
-                    else if ((entryRoad == 'A' && exitRoad == 'B') ||
-                             (entryRoad == 'B' && exitRoad == 'C') ||
-                             (entryRoad == 'C' && exitRoad == 'D') ||
-                             (entryRoad == 'D' && exitRoad == 'A'))
-                    {
-                        // Right turn - adjust path
-                        float turnFactor = (current->progress - 0.4f) / 0.2f; // 0 to 1 during the turn
-
-                        if (entryRoad == 'A')
-                        {
-                            // From A to B (turn right)
-                            interX = current->startX + (centerX + LANE_WIDTH * (exitLaneNum - 1) - current->startX) * turnFactor;
-                            interY = current->startY + (centerY - current->startY) * turnFactor;
-                        }
-                        else if (entryRoad == 'B')
-                        {
-                            // From B to C (turn right)
-                            interX = current->startX - (current->startX - centerX) * turnFactor;
-                            interY = current->startY + (centerY + LANE_WIDTH * (exitLaneNum - 1) - current->startY) * turnFactor;
-                        }
-                        else if (entryRoad == 'C')
-                        {
-                            // From C to D (turn right)
-                            interX = current->startX - (current->startX - centerX) * turnFactor;
-                            interY = current->startY - (current->startY - centerY) * turnFactor;
-                        }
-                        else if (entryRoad == 'D')
-                        {
-                            // From D to A (turn right)
-                            interX = current->startX + (centerX - current->startX) * turnFactor;
-                            interY = current->startY - (current->startY - centerY) * turnFactor;
-                        }
-
-                        current->x = interX;
-                        current->y = interY;
-                        continue; // Skip the normal interpolation
-                    }
-                    else if ((entryRoad == 'A' && exitRoad == 'D') ||
-                             (entryRoad == 'B' && exitRoad == 'A') ||
-                             (entryRoad == 'C' && exitRoad == 'B') ||
-                             (entryRoad == 'D' && exitRoad == 'C'))
-                    {
-                        // Left turn - adjust path
-                        float turnFactor = (current->progress - 0.4f) / 0.2f; // 0 to 1 during the turn
-
-                        if (entryRoad == 'A')
-                        {
-                            // From A to D (turn left)
-                            interX = current->startX - (current->startX - centerX) * turnFactor;
-                            interY = current->startY + (centerY - current->startY) * turnFactor;
-                        }
-                        else if (entryRoad == 'B')
-                        {
-                            // From B to A (turn left)
-                            interX = current->startX - (current->startX - centerX) * turnFactor;
-                            interY = current->startY - (current->startY - centerY) * turnFactor;
-                        }
-                        else if (entryRoad == 'C')
-                        {
-                            // From C to B (turn left)
-                            interX = current->startX + (centerX - current->startX) * turnFactor;
-                            interY = current->startY - (current->startY - centerY) * turnFactor;
-                        }
-                        else if (entryRoad == 'D')
-                        {
-                            // From D to C (turn left)
-                            interX = current->startX + (centerX - current->startX) * turnFactor;
-                            interY = current->startY + (centerY - current->startY) * turnFactor;
-                        }
-
-                        current->x = interX;
-                        current->y = interY;
-                        continue; // Skip the normal interpolation
-                    }
-                }
-
-                // Normal linear interpolation for beginning and end of journey
-                if (current->progress <= 0.4f || current->progress >= 0.6f)
-                {
-                    if (current->progress < 0.4f)
-                    {
-                        // First 40% of journey - go from start to intersection approach
-                        float adjustedProgress = current->progress / 0.4f;
-                        current->x = current->startX + (centerX - current->startX) * adjustedProgress;
-                        current->y = current->startY + (centerY - current->startY) * adjustedProgress;
-                    }
-                    else
-                    {
-                        // Last 40% of journey - go from intersection exit to end
-                        float adjustedProgress = (current->progress - 0.6f) / 0.4f;
-                        current->x = centerX + (current->endX - centerX) * adjustedProgress;
-                        current->y = centerY + (current->endY - centerY) * adjustedProgress;
-                    }
-                }
+                // Update position based on progress
+                updateVehiclePositionBasedOnPath(current, centerX, centerY);
             }
         }
 
+        // Move to next vehicle
         prev = current;
         current = current->next;
+    }
+}
+
+// Helper function to update vehicle position based on its progress and path
+void updateVehiclePositionBasedOnPath(Vehicle *vehicle, int centerX, int centerY)
+{
+    if (!vehicle)
+        return;
+
+    // Get entry and exit information
+    char entryRoad = vehicle->entryLane[0];
+    char exitRoad = vehicle->exitLane[0];
+    int entryLaneNum = vehicle->entryLane[2] - '0';
+    int exitLaneNum = vehicle->exitLane[2] - '0';
+
+    // Check which part of the journey the vehicle is in
+    if (vehicle->progress < 0.4f)
+    {
+        // Approaching intersection (first 40% of journey)
+        float adjustedProgress = vehicle->progress / 0.4f;
+        vehicle->x = vehicle->startX + (centerX - vehicle->startX) * adjustedProgress;
+        vehicle->y = vehicle->startY + (centerY - vehicle->startY) * adjustedProgress;
+    }
+    else if (vehicle->progress <= 0.6f)
+    {
+        // Going through intersection (20% of journey)
+        float turnProgress = (vehicle->progress - 0.4f) / 0.2f; // 0.0 to 1.0
+
+        // Determine movement type based on entry/exit roads
+        bool isStraight = ((entryRoad == 'A' && exitRoad == 'C') ||
+                           (entryRoad == 'C' && exitRoad == 'A') ||
+                           (entryRoad == 'B' && exitRoad == 'D') ||
+                           (entryRoad == 'D' && exitRoad == 'B'));
+
+        bool isRightTurn = ((entryRoad == 'A' && exitRoad == 'B') ||
+                            (entryRoad == 'B' && exitRoad == 'C') ||
+                            (entryRoad == 'C' && exitRoad == 'D') ||
+                            (entryRoad == 'D' && exitRoad == 'A'));
+
+        // The remaining case is left turn
+
+        if (isStraight)
+        {
+            // Simple linear interpolation for straight movement
+            vehicle->x = centerX + (vehicle->endX - centerX) * turnProgress;
+            vehicle->y = centerY + (vehicle->endY - centerY) * turnProgress;
+        }
+        else if (isRightTurn)
+        {
+            // Right turn calculation
+            if (entryRoad == 'A') // A to B
+            {
+                vehicle->x = centerX + LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+                vehicle->y = centerY - (centerY - vehicle->startY) * (1 - turnProgress);
+            }
+            else if (entryRoad == 'B') // B to C
+            {
+                vehicle->x = centerX - (centerX - vehicle->endX) * turnProgress;
+                vehicle->y = centerY + LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+            }
+            else if (entryRoad == 'C') // C to D
+            {
+                vehicle->x = centerX - LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+                vehicle->y = centerY + (centerY - vehicle->endY) * turnProgress;
+            }
+            else if (entryRoad == 'D') // D to A
+            {
+                vehicle->x = centerX + (centerX - vehicle->endX) * turnProgress;
+                vehicle->y = centerY - LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+            }
+        }
+        else
+        {
+            // Left turn calculation
+            if (entryRoad == 'A') // A to D
+            {
+                vehicle->x = centerX - LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+                vehicle->y = centerY + (centerY - vehicle->startY) * turnProgress;
+            }
+            else if (entryRoad == 'B') // B to A
+            {
+                vehicle->x = centerX - (centerX - vehicle->endX) * turnProgress;
+                vehicle->y = centerY - LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+            }
+            else if (entryRoad == 'C') // C to B
+            {
+                vehicle->x = centerX + LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+                vehicle->y = centerY - (centerY - vehicle->endY) * turnProgress;
+            }
+            else if (entryRoad == 'D') // D to C
+            {
+                vehicle->x = centerX + (centerX - vehicle->endX) * turnProgress;
+                vehicle->y = centerY + LANE_WIDTH * (exitLaneNum - 1) * turnProgress;
+            }
+        }
+    }
+    else
+    {
+        // Leaving intersection (last 40% of journey)
+        float adjustedProgress = (vehicle->progress - 0.6f) / 0.4f;
+        vehicle->x = centerX + (vehicle->endX - centerX) * adjustedProgress;
+        vehicle->y = centerY + (vehicle->endY - centerY) * adjustedProgress;
     }
 }

@@ -20,7 +20,7 @@ The Data is Successfully parsed in simulator side
 
 Simulation:
 It works upto the switching of lanes, dequeue implementation and lights remaining:
-![alt text](./images/ezgif.com-video-to-gif-converter.gif)
+![alt text](./images/traffic.gif)
 
 ## Description
 
