@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "animation.h"
+#include "math.h"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 900
 #define ROAD_WIDTH 180  // Each road's total width (3 lanes x 60 width)
 #define LANE_WIDTH 60   // Width of each lane
 #define VEHICLE_SIZE 30 // Vehicle size (width and height)
+#define M_PI 3.14159265358979323846
 
 // Initialize the queue for each lane
 void initializeQueue(LaneQueue *queue)
@@ -63,7 +65,9 @@ void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char 
     queue->size = queue->size + 1;
 }
 
-void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue, int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer)
+void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue,
+                int id, const char *entryLane, const char *exitLane, const char *direction,
+                SDL_Renderer *renderer)
 {
     if (strcmp(entryLane, "AL2") == 0)
     {
@@ -78,7 +82,7 @@ void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, L
     else if (strcmp(entryLane, "CL2") == 0)
     {
         enqueueVehicle(CL2Queue, id, entryLane, exitLane, direction, renderer);
-        printf("Enqueued vehicle with ID %d to DL2\n", id);
+        printf("Enqueued vehicle with ID %d to CL2\n", id); // Fixed: was printing DL2
     }
     else if (strcmp(entryLane, "DL2") == 0)
     {
@@ -87,7 +91,7 @@ void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, L
     }
     else
     {
-        printf("No matching entry lane for vehicle ID %d\n", id);
+        printf("No matching entry lane for vehicle ID %d: %s\n", id, entryLane);
     }
 }
 
@@ -285,62 +289,294 @@ void initializeVehiclePosition(Vehicle *vehicle, const char *entryLane, const ch
 
 void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction)
 {
-    // Set color based on direction
+    // Base vehicle colors based on direction
+    SDL_Color baseColor;
     if (strcmp(direction, "N") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 143, 0, 255, 255);
+        baseColor = (SDL_Color){143, 0, 255, 255}; // Purple
     }
     else if (strcmp(direction, "E") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 33, 79, 198, 255);
+        baseColor = (SDL_Color){33, 79, 198, 255}; // Blue
     }
     else if (strcmp(direction, "S") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue for South
+        baseColor = (SDL_Color){0, 0, 255, 255}; // Dark Blue
     }
     else if (strcmp(direction, "W") == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 255, 127, 0, 255); // Cyan
+        baseColor = (SDL_Color){255, 127, 0, 255}; // Orange
     }
     else
     {
-        SDL_SetRenderDrawColor(renderer, 8, 133, 161, 255);
+        baseColor = (SDL_Color){8, 133, 161, 255}; // Teal
     }
 
-    // Create vehicle shape (rectangle + direction indicator)
-    SDL_FRect vehicleRect = {x - VEHICLE_SIZE / 2, y - VEHICLE_SIZE / 2, VEHICLE_SIZE, VEHICLE_SIZE};
-    SDL_RenderFillRect(renderer, &vehicleRect);
+    // Calculate brighter color for highlights
+    SDL_Color lightColor = {
+        (Uint8)SDL_min(255, baseColor.r + 40),
+        (Uint8)SDL_min(255, baseColor.g + 40),
+        (Uint8)SDL_min(255, baseColor.b + 40),
+        255};
 
-    // Add direction indicator (triangle)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White for the direction indicator
+    // Calculate darker color for shadows
+    SDL_Color darkColor = {
+        (Uint8)SDL_max(0, baseColor.r - 40),
+        (Uint8)SDL_max(0, baseColor.g - 40),
+        (Uint8)SDL_max(0, baseColor.b - 40),
+        255};
 
+    // Car body dimensions
+    float carWidth = VEHICLE_SIZE;
+    float carLength = VEHICLE_SIZE * 1.5;
+    float carHeight = VEHICLE_SIZE * 0.7; // For 3D effect
+
+    // Rotate dimensions based on direction
+    float width, length;
+    if (strcmp(direction, "N") == 0 || strcmp(direction, "S") == 0)
+    {
+        width = carWidth;
+        length = carLength;
+    }
+    else
+    {
+        width = carLength;
+        length = carWidth;
+    }
+
+    // Draw shadow (offset slightly)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
+    SDL_FRect shadowRect = {
+        x - width / 2 + 3,
+        y - length / 2 + 3,
+        width,
+        length};
+    SDL_RenderFillRect(renderer, &shadowRect);
+
+    // Draw car body
+    SDL_SetRenderDrawColor(renderer, baseColor.r, baseColor.g, baseColor.b, baseColor.a);
+    SDL_FRect carBody = {
+        x - width / 2,
+        y - length / 2,
+        width,
+        length};
+    SDL_RenderFillRect(renderer, &carBody);
+
+    // Draw car top/cabin (smaller rectangle in the middle)
     if (strcmp(direction, "N") == 0)
     {
-        // North-pointing triangle
-        SDL_RenderLine(renderer, x, y - VEHICLE_SIZE / 2, x - VEHICLE_SIZE / 4, y);
-        SDL_RenderLine(renderer, x, y - VEHICLE_SIZE / 2, x + VEHICLE_SIZE / 4, y);
-        SDL_RenderLine(renderer, x - VEHICLE_SIZE / 4, y, x + VEHICLE_SIZE / 4, y);
-    }
-    else if (strcmp(direction, "E") == 0)
-    {
-        // East-pointing triangle
-        SDL_RenderLine(renderer, x + VEHICLE_SIZE / 2, y, x, y - VEHICLE_SIZE / 4);
-        SDL_RenderLine(renderer, x + VEHICLE_SIZE / 2, y, x, y + VEHICLE_SIZE / 4);
-        SDL_RenderLine(renderer, x, y - VEHICLE_SIZE / 4, x, y + VEHICLE_SIZE / 4);
+        // Draw top section for north-facing car
+        SDL_SetRenderDrawColor(renderer, lightColor.r, lightColor.g, lightColor.b, lightColor.a);
+        SDL_FRect carTop = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.2,
+            width * 0.6,
+            length * 0.4};
+        SDL_RenderFillRect(renderer, &carTop);
+
+        // Draw windshield
+        SDL_SetRenderDrawColor(renderer, 200, 230, 255, 255); // Light blue for glass
+        SDL_FRect windshield = {
+            x - width / 2 + width * 0.25,
+            y - length / 2 + length * 0.2,
+            width * 0.5,
+            length * 0.1};
+        SDL_RenderFillRect(renderer, &windshield);
+
+        // Draw headlights
+        SDL_SetRenderDrawColor(renderer, 255, 255, 200, 255); // Yellow-white
+        SDL_FRect headlightLeft = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.05,
+            width * 0.15,
+            length * 0.05};
+        SDL_FRect headlightRight = {
+            x - width / 2 + width * 0.65,
+            y - length / 2 + length * 0.05,
+            width * 0.15,
+            length * 0.05};
+        SDL_RenderFillRect(renderer, &headlightLeft);
+        SDL_RenderFillRect(renderer, &headlightRight);
     }
     else if (strcmp(direction, "S") == 0)
     {
-        // South-pointing triangle
-        SDL_RenderLine(renderer, x, y + VEHICLE_SIZE / 2, x - VEHICLE_SIZE / 4, y);
-        SDL_RenderLine(renderer, x, y + VEHICLE_SIZE / 2, x + VEHICLE_SIZE / 4, y);
-        SDL_RenderLine(renderer, x - VEHICLE_SIZE / 4, y, x + VEHICLE_SIZE / 4, y);
+        // Draw top section for south-facing car
+        SDL_SetRenderDrawColor(renderer, lightColor.r, lightColor.g, lightColor.b, lightColor.a);
+        SDL_FRect carTop = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.4,
+            width * 0.6,
+            length * 0.4};
+        SDL_RenderFillRect(renderer, &carTop);
+
+        // Draw windshield
+        SDL_SetRenderDrawColor(renderer, 200, 230, 255, 255);
+        SDL_FRect windshield = {
+            x - width / 2 + width * 0.25,
+            y - length / 2 + length * 0.7,
+            width * 0.5,
+            length * 0.1};
+        SDL_RenderFillRect(renderer, &windshield);
+
+        // Draw tail lights
+        SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255); // Red
+        SDL_FRect tailLightLeft = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.9,
+            width * 0.15,
+            length * 0.05};
+        SDL_FRect tailLightRight = {
+            x - width / 2 + width * 0.65,
+            y - length / 2 + length * 0.9,
+            width * 0.15,
+            length * 0.05};
+        SDL_RenderFillRect(renderer, &tailLightLeft);
+        SDL_RenderFillRect(renderer, &tailLightRight);
+    }
+    else if (strcmp(direction, "E") == 0)
+    {
+        // Draw top section for east-facing car
+        SDL_SetRenderDrawColor(renderer, lightColor.r, lightColor.g, lightColor.b, lightColor.a);
+        SDL_FRect carTop = {
+            x - width / 2 + width * 0.4,
+            y - length / 2 + length * 0.2,
+            width * 0.4,
+            length * 0.6};
+        SDL_RenderFillRect(renderer, &carTop);
+
+        // Draw windshield
+        SDL_SetRenderDrawColor(renderer, 200, 230, 255, 255);
+        SDL_FRect windshield = {
+            x - width / 2 + width * 0.7,
+            y - length / 2 + length * 0.25,
+            width * 0.1,
+            length * 0.5};
+        SDL_RenderFillRect(renderer, &windshield);
+
+        // Draw headlights
+        SDL_SetRenderDrawColor(renderer, 255, 255, 200, 255); // Yellow-white
+        SDL_FRect headlight = {
+            x - width / 2 + width * 0.9,
+            y - length / 2 + length * 0.25,
+            width * 0.05,
+            length * 0.15};
+        SDL_FRect headlight2 = {
+            x - width / 2 + width * 0.9,
+            y - length / 2 + length * 0.6,
+            width * 0.05,
+            length * 0.15};
+        SDL_RenderFillRect(renderer, &headlight);
+        SDL_RenderFillRect(renderer, &headlight2);
     }
     else if (strcmp(direction, "W") == 0)
     {
-        // West-pointing triangle
-        SDL_RenderLine(renderer, x - VEHICLE_SIZE / 2, y, x, y - VEHICLE_SIZE / 4);
-        SDL_RenderLine(renderer, x - VEHICLE_SIZE / 2, y, x, y + VEHICLE_SIZE / 4);
-        SDL_RenderLine(renderer, x, y - VEHICLE_SIZE / 4, x, y + VEHICLE_SIZE / 4);
+        // Draw top section for west-facing car
+        SDL_SetRenderDrawColor(renderer, lightColor.r, lightColor.g, lightColor.b, lightColor.a);
+        SDL_FRect carTop = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.2,
+            width * 0.4,
+            length * 0.6};
+        SDL_RenderFillRect(renderer, &carTop);
+
+        // Draw windshield
+        SDL_SetRenderDrawColor(renderer, 200, 230, 255, 255);
+        SDL_FRect windshield = {
+            x - width / 2 + width * 0.2,
+            y - length / 2 + length * 0.25,
+            width * 0.1,
+            length * 0.5};
+        SDL_RenderFillRect(renderer, &windshield);
+
+        // Draw tail lights
+        SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255); // Red
+        SDL_FRect tailLight = {
+            x - width / 2 + width * 0.05,
+            y - length / 2 + length * 0.25,
+            width * 0.05,
+            length * 0.15};
+        SDL_FRect tailLight2 = {
+            x - width / 2 + width * 0.05,
+            y - length / 2 + length * 0.6,
+            width * 0.05,
+            length * 0.15};
+        SDL_RenderFillRect(renderer, &tailLight);
+        SDL_RenderFillRect(renderer, &tailLight2);
+    }
+
+    // Draw wheels
+    SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255); // Dark gray/black
+
+    float wheelSize = VEHICLE_SIZE * 0.25;
+    float wheelOffset = VEHICLE_SIZE * 0.3;
+
+    if (strcmp(direction, "N") == 0 || strcmp(direction, "S") == 0)
+    {
+        // Front-left wheel
+        SDL_FRect wheelFL = {
+            x - width / 2 - wheelSize / 3,
+            y - length / 2 + wheelOffset,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelFL);
+
+        // Front-right wheel
+        SDL_FRect wheelFR = {
+            x + width / 2 - wheelSize + wheelSize / 3,
+            y - length / 2 + wheelOffset,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelFR);
+
+        // Rear-left wheel
+        SDL_FRect wheelRL = {
+            x - width / 2 - wheelSize / 3,
+            y + length / 2 - wheelOffset - wheelSize,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelRL);
+
+        // Rear-right wheel
+        SDL_FRect wheelRR = {
+            x + width / 2 - wheelSize + wheelSize / 3,
+            y + length / 2 - wheelOffset - wheelSize,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelRR);
+    }
+    else
+    {
+        // Left-front wheel
+        SDL_FRect wheelLF = {
+            x - width / 2 + wheelOffset,
+            y - length / 2 - wheelSize / 3,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelLF);
+
+        // Right-front wheel
+        SDL_FRect wheelRF = {
+            x + width / 2 - wheelOffset - wheelSize,
+            y - length / 2 - wheelSize / 3,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelRF);
+
+        // Left-rear wheel
+        SDL_FRect wheelLR = {
+            x - width / 2 + wheelOffset,
+            y + length / 2 - wheelSize + wheelSize / 3,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelLR);
+
+        // Right-rear wheel
+        SDL_FRect wheelRR = {
+            x + width / 2 - wheelOffset - wheelSize,
+            y + length / 2 - wheelSize + wheelSize / 3,
+            wheelSize,
+            wheelSize};
+        SDL_RenderFillRect(renderer, &wheelRR);
     }
 }
 
@@ -366,16 +602,36 @@ void updateVehiclesInQueue(LaneQueue *queue)
 
     while (current != NULL)
     {
+        // Store next pointer since current might be freed
+        Vehicle *next = current->next;
+
         if (!current->active)
         {
-            prev = current;
-            current = current->next;
+            // Remove inactive vehicles from the queue
+            if (prev == NULL) // If it's the front vehicle
+            {
+                queue->front = current->next;
+                if (queue->front == NULL) // If queue becomes empty
+                    queue->rear = NULL;
+            }
+            else
+            {
+                prev->next = current->next;
+                if (current == queue->rear) // If it's the rear vehicle
+                    queue->rear = prev;
+            }
+
+            queue->size--;
+            free(current);
+            current = next;
             continue;
         }
 
-        // Check if vehicle is at different points of its journey
-        bool atIntersectionEntrance = (current->progress >= 0.39f && current->progress < 0.41f);
-        bool inIntersection = (current->progress >= 0.4f && current->progress <= 0.6f);
+        // Check if vehicle is approaching the intersection entrance
+        bool atIntersectionEntrance = (current->progress >= 0.25f && current->progress < 0.4f);
+
+        // Check if vehicle has entered the intersection
+        bool hasEnteredIntersection = (current->progress >= 0.4f);
 
         // Check spacing with vehicle ahead (if any)
         bool shouldMaintainGap = false;
@@ -395,8 +651,8 @@ void updateVehiclesInQueue(LaneQueue *queue)
         // Determine if vehicle should move
         bool shouldMove = true;
 
-        // Stop at red light if at intersection entrance
-        if (atIntersectionEntrance && !canMoveThrough)
+        // Only stop at red light if at intersection entrance and NOT already in the intersection
+        if (atIntersectionEntrance && !canMoveThrough && !hasEnteredIntersection)
         {
             shouldMove = false;
         }
@@ -418,19 +674,7 @@ void updateVehiclesInQueue(LaneQueue *queue)
                 // Vehicle has completed its journey
                 current->active = false;
 
-                // Only dequeue if this is the front vehicle
-                if (current == queue->front)
-                {
-                    Vehicle *temp = current;
-                    current = current->next;
-                    queue->front = current;
-                    if (queue->front == NULL)
-                        queue->rear = NULL;
-                    queue->size--;
-                    free(temp);
-                    prev = NULL; // Reset prev since we've removed the front
-                    continue;
-                }
+                // We'll remove it in the next iteration
             }
             else
             {
@@ -441,11 +685,10 @@ void updateVehiclesInQueue(LaneQueue *queue)
 
         // Move to next vehicle
         prev = current;
-        current = current->next;
+        current = next;
     }
 }
 
-// Helper function to update vehicle position based on its progress and path
 void updateVehiclePositionBasedOnPath(Vehicle *vehicle, int centerX, int centerY)
 {
     if (!vehicle)

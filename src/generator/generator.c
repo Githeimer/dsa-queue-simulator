@@ -21,34 +21,38 @@ void generateVehicle(Lane *lane, int *vehicleIdCounter)
     // Define the valid exit lanes based on the entry lane
     const char **exitLanes = NULL;
     int numExitLanes = 0;
+    const char directions[] = {'N', 'E', 'S', 'W'};
+    char direction;
 
     if (strcmp(entryLane, "AL2") == 0)
     {
         exitLanes = exitLanesAL2;
         numExitLanes = 2;
+        direction = directions[0];
     }
     else if (strcmp(entryLane, "BL2") == 0)
     {
         exitLanes = exitLanesBL2;
         numExitLanes = 2;
+        direction = directions[1];
     }
     else if (strcmp(entryLane, "CL2") == 0)
     {
         exitLanes = exitLanesCL2;
         numExitLanes = 2;
+        direction = directions[2];
     }
     else if (strcmp(entryLane, "DL2") == 0)
     {
         exitLanes = exitLanesDL2;
         numExitLanes = 2;
+        direction = directions[3];
     }
 
     // Randomly choose an exit lane
     const char *exitLane = exitLanes[rand() % numExitLanes];
 
     // Randomly pick a direction (N, E, S, W)
-    const char directions[] = {'N', 'E', 'S', 'W'};
-    char direction = directions[rand() % 4];
 
     // Create the vehicle with a unique ID
     Vehicle *vehicle = createVehicle(*vehicleIdCounter, entryLane, exitLane, direction);
