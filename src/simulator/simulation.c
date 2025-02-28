@@ -21,7 +21,10 @@ typedef struct SimulationVehicle
 Vehicle vehicles[MAX_VEHICLES];
 int vehicleCount = 0;
 
-LaneQueue AL2Queue, BL2Queue, CL2Queue, DL2Queue;
+LaneQueue AL2Queue;
+LaneQueue BL2Queue;
+LaneQueue CL2Queue;
+LaneQueue DL2Queue;
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -165,9 +168,18 @@ int main()
         SDL_RenderClear(renderer);
         DrawRoad(renderer);
 
+        // Read new vehicle data - this now just adds to queues without rendering
         readVehicleData("./data/vehicles.txt", renderer);
 
+        // Update all vehicle positions
+        updateAllVehicles(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue);
+
+        renderAllVehicles(&AL2Queue, &BL2Queue, &CL2Queue, &DL2Queue, renderer);
+
         SDL_RenderPresent(renderer);
+
+        // Add a small delay to control frame rate
+        SDL_Delay(16); // Approx 60 FPS
     }
 
     closeSDL();

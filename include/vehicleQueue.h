@@ -9,9 +9,18 @@ typedef struct Vehicle
     char entryLane[4];
     char exitLane[4];
     char direction[2];
+
+    // New fields for animation
+    int x, y;       // Current position
+    float progress; // Animation progress (0.0 to 1.0)
+    bool active;    // Whether this vehicle is currently being animated
+
+    // Path information
+    int startX, startY; // Starting coordinates
+    int endX, endY;     // Ending coordinates
+
     struct Vehicle *next;
 } Vehicle;
-
 // Define the Lane Queue structure
 typedef struct LaneQueue
 {
@@ -26,8 +35,22 @@ void initializeQueue(LaneQueue *queue);
 // Function to enqueue a vehicle into the correct lane's queue
 void enqueueVehicle(LaneQueue *queue, int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer);
 
+void dequeueVehicle(LaneQueue *queue);
+
 // Function to check the vehicle's entry lane and enqueue it accordingly
 void checkQueue(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue,
                 int id, const char *entryLane, const char *exitLane, const char *direction, SDL_Renderer *renderer);
+
+void updateAllVehicles(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue);
+
+void initializeVehiclePosition(Vehicle *vehicle, const char *entryLane, const char *exitLane);
+
+void updateVehiclesInQueue(LaneQueue *queue);
+
+void renderAllVehicles(LaneQueue *AL2Queue, LaneQueue *BL2Queue, LaneQueue *CL2Queue, LaneQueue *DL2Queue, SDL_Renderer *renderer);
+
+void renderVehiclesInQueue(LaneQueue *queue, SDL_Renderer *renderer);
+
+void drawVehicle(SDL_Renderer *renderer, int x, int y, const char *direction);
 
 #endif // VEHICLEQUEUE_H
