@@ -9,22 +9,18 @@ typedef enum
     GREEN,
     YELLOW
 } TrafficLightState;
-// Define the Vehicle structure for simulation
+
 typedef struct Vehicle
 {
     int id;
     char entryLane[4];
     char exitLane[4];
     char direction[2];
-
-    // New fields for animation
     int x, y;       // Current position
     float progress; // Animation progress (0.0 to 1.0)
-    bool active;    // Whether this vehicle is currently being animated
-
-    // Path information
-    int startX, startY; // Starting coordinates
-    int endX, endY;     // Ending coordinates
+    bool active;
+    int startX, startY;
+    int endX, endY;
 
     struct Vehicle *next;
 } Vehicle;

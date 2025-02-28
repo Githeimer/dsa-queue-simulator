@@ -83,7 +83,7 @@ void DrawRoad(SDL_Renderer *renderer)
     SDL_RenderFillRect(renderer, &roadC);
     SDL_RenderFillRect(renderer, &roadD);
 
-    // Draw lane dividers (White lines for lanes)
+    // Draw lane dividers (Yellow lines for lanes)
     SDL_SetRenderDrawColor(renderer, 255, 250, 0, 255);
 
     int dashLength = 15, gapLength = 15;
